@@ -60,7 +60,14 @@ function updateStatusBar() {
 
 // Initialisierung erst wenn DOM bereit
 window.addEventListener('DOMContentLoaded', () => {
-    // 1. Editor Initialisierung
+    // 1. Sicherheits-Check für Bibliotheken
+    if (typeof toastui === 'undefined' || !toastui.Editor) {
+        console.error("ToastUI konnte nicht geladen werden. CDN eventuell blockiert?");
+        alert("Kritischer Fehler: Die Editor-Bibliothek konnte nicht geladen werden. Bitte prüfe deine Internetverbindung oder schalte Ad-Blocker/Tracking-Schutz kurzzeitig aus.");
+        return;
+    }
+
+    // 2. Editor Initialisierung
     try {
         editor = new toastui.Editor({
             el: document.querySelector('#editor-widget'),
