@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notepad MD</title>
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Libraries (CDNs) -->
+    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body class="windows-theme">
+    <div id="app">
+        <header class="window-header">
+            <div class="window-title">
+                <img src="https://img.icons8.com/color/48/markdown.png" width="16" height="16" alt="icon">
+                <span id="file-title">Notepad MD - Unbenannt</span>
+            </div>
+            <div class="window-controls">
+                <button class="win-btn minify"><span></span></button>
+                <button class="win-btn expand"><span></span></button>
+                <button class="win-btn close"><span></span></button>
+            </div>
+        </header>
+
+        <nav class="menu-bar">
+            <div class="menu-item">
+                <span>Datei</span>
+                <div class="dropdown">
+                    <div id="menu-new">Neu</div>
+                    <div id="menu-open">Öffnen...</div>
+                    <div id="menu-save">Speichern</div>
+                    <div class="divider"></div>
+                    <div id="menu-export-pdf">Als PDF exportieren</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span>Bearbeiten</span>
+                <div class="dropdown">
+                    <div id="menu-undo">Rückgängig</div>
+                    <div id="menu-redo">Wiederholen</div>
+                    <div class="divider"></div>
+                    <div id="menu-clear">Alles löschen</div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span>Ansicht</span>
+                <div class="dropdown">
+                    <div id="menu-toggle-theme">Theme umschalten</div>
+                    <div id="menu-fullscreen">Vollbild</div>
+                </div>
+            </div>
+        </nav>
+        
+        <main class="editor-container">
+            <textarea id="my-text-editor"></textarea>
+        </main>
+        
+        <footer class="status-bar">
+            <div class="status-item" id="cursor-pos">Zeile 1, Spalte 1</div>
+            <div class="status-item">UTF-8</div>
+            <div class="status-item">Markdown</div>
+        </footer>
+    </div>
+
+    <!-- Hidden file input for compatibility -->
+    <input type="file" id="file-input" style="display: none;" accept=".md,.txt">
+    <div id="pdf-render-area" style="display: none;"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
