@@ -11,13 +11,41 @@
   "build": {
     "appId": "com.lassandriel.mdeditor",
     "productName": "MD Editor",
+    "compression": "maximum",
+    "asar": true,
     "directories": {
       "output": "dist"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "public/logo.png"
     },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "deleteAppDataOnUninstall": true
+    },
+    "files": [
+      "**/*",
+      "!dist/*",
+      "!node_modules/*",
+      "!IDEAS.md",
+      "!README.md",
+      "!BUG_report.png",
+      "!LICENSE",
+      "!package-lock.json",
+      "!public/MD Editor.png",
+      "!.git/*",
+      "!.gitignore"
+    ],
     "fileAssociations": [
       {
         "ext": "md",
@@ -36,7 +64,7 @@
     "url": "git+https://github.com/Lassandriel/MD-Editor.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Lassandriel",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {

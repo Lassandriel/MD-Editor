@@ -111,6 +111,22 @@ document.getElementById('menu-open').addEventListener('click', async () => {
         if (!result.canceled && result.filePaths.length > 0) {
             loadFile(result.filePaths[0]);
         }
+    } else {
+        // Web-Fallback: Klick auf verstecktes Input-Feld
+        document.getElementById('web-file-input').click();
+    }
+});
+
+// Listener für Web-Datei-Input
+document.getElementById('web-file-input').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            editor.setMarkdown(e.target.result);
+            fileTitle.textContent = `MD Editor - ${file.name}`;
+        };
+        reader.readAsText(file);
     }
 });
 
@@ -133,6 +149,16 @@ document.getElementById('menu-save').addEventListener('click', async () => {
         } catch (err) {
             console.error('Fehler beim Speichern:', err);
         }
+    } else {
+        // Web-Fallback: Download als Datei
+        const content = editor.getMarkdown();
+        const blob = new Blob([content], { type: 'text/markdown' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'notiz.md';
+        a.click();
+        URL.revokeObjectURL(url);
     }
 });
 
@@ -255,8 +281,9 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelector('#editor-widget').classList.add('toastui-editor-dark');
     }
 
-    // Window Controls
+    // Electron-Check für UI
     if (window.electronAPI) {
+        document.body.classList.add('is-electron');
         document.querySelector('.win-btn.minify').addEventListener('click', () => window.electronAPI.minimize());
         document.querySelector('.win-btn.expand').addEventListener('click', () => window.electronAPI.maximize());
         document.querySelector('.win-btn.close').addEventListener('click', () => window.electronAPI.close());
@@ -277,9 +304,22 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Hilfe Menü
     document.getElementById('menu-github').addEventListener('click', () => {
-        window.electronAPI.openExternal('https://github.com/Lassandriel/MD-Editor');
+        const url = 'https://github.com/Lassandriel/MD-Editor';
+        if (window.electronAPI) {
+            window.electronAPI.openExternal(url);
+        } else {
+            window.open(url, '_blank');
+        }
     });
+
+    const aboutModal = document.getElementById('about-modal');
     document.getElementById('menu-about').addEventListener('click', () => {
-        alert('MD Editor v1.0.0\nEin minimalistischer Markdown-Editor.\nErstellt von Lassandriel.');
+        aboutModal.style.display = 'block';
+    });
+    document.getElementById('close-about').addEventListener('click', () => {
+        aboutModal.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === aboutModal) aboutModal.style.display = 'none';
     });
 });
