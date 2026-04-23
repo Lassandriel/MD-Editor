@@ -1,118 +1,179 @@
-/**
- * @typedef {import('easymde')} EasyMDE
- */
-
-// EasyMDE Initialisierung
-const easyMDE = new EasyMDE({
-    element: document.getElementById('my-text-editor'),
-    spellChecker: false,
-    autosave: {
-        enabled: true,
-        uniqueId: "notepademd-save-1",
-        delay: 1000,
-    },
-    toolbar: [
-        "bold", "italic", "heading", "|", 
-        "quote", "unordered-list", "ordered-list", "|", 
-        "link", "image", "table", "|", 
-        "preview", "side-by-side", "fullscreen", "|", 
-        "guide"
+// ToastUI Editor Initialisierung (WYSIWYG Fokus)
+const editor = new toastui.Editor({
+    el: document.querySelector('#editor-widget'),
+    height: '100%',
+    initialEditType: 'wysiwyg',
+    previewStyle: 'tab',
+    hideModeSwitch: true, // Versteckt den Code-Modus für ein sauberes Wordpad-Gefühl
+    usageStatistics: false,
+    toolbarItems: [
+        ['heading', 'bold', 'italic', 'strike'],
+        ['hr', 'quote'],
+        ['ul', 'ol', 'task', 'indent', 'outdent'],
+        ['table', 'image', 'link'],
+        ['code', 'codeblock']
     ],
-    placeholder: "Schreibe hier dein Markdown...",
-    status: false,
-    renderingConfig: {
-        singleLineBreaks: false,
-        codeSyntaxHighlighting: true,
-    },
-    previewRender: function(plainText) {
-        // Standard Markdown Rendering
-        const html = easyMDE.markdown(plainText);
-        
-        // Mermaid Rendering nach einem kurzen Delay (damit das HTML im DOM ist)
-        setTimeout(async () => {
-            const previewEl = document.querySelector('.editor-preview-active');
-            if (previewEl) {
-                const mermaidBlocks = previewEl.querySelectorAll('pre code.language-mermaid');
-                for (let i = 0; i < mermaidBlocks.length; i++) {
-                    const block = mermaidBlocks[i];
-                    const content = block.textContent;
-                    const id = `mermaid-svg-${i}-${Math.random().toString(36).substr(2, 9)}`;
-                    try {
-                        const { svg } = await mermaid.render(id, content);
-                        block.parentElement.outerHTML = `<div class="mermaid">${svg}</div>`;
-                    } catch (err) {
-                        console.error('Mermaid error:', err);
-                    }
-                }
-            }
-        }, 50);
-        
-        return html;
+    plugins: [toastui.Editor.plugin.colorSyntax],
+    theme: localStorage.getItem('md-notepad-theme') === 'dark' ? 'dark' : 'light',
+    language: localStorage.getItem('md-notepad-lang') === 'en' ? 'en-US' : 'de-DE',
+    events: {
+        change: () => updateStatusBar()
     }
 });
 
+const translations = {
+    de: {
+        'menu-file': 'Datei',
+        'menu-new': 'Neu',
+        'menu-open': 'Öffnen...',
+        'menu-save': 'Speichern',
+        'menu-export-pdf': 'Als PDF exportieren',
+        'menu-edit': 'Bearbeiten',
+        'menu-undo': 'Rückgängig',
+        'menu-redo': 'Wiederholen',
+        'menu-clear': 'Alles löschen',
+        'menu-view': 'Ansicht',
+        'menu-toggle-theme': 'Theme umschalten',
+        'menu-fullscreen': 'Vollbild',
+        'menu-language': 'Sprache',
+        'menu-help': 'Hilfe',
+        'menu-about': 'Über NotepadMD',
+        'untitled': 'Unbenannt'
+    },
+    en: {
+        'menu-file': 'File',
+        'menu-new': 'New',
+        'menu-open': 'Open...',
+        'menu-save': 'Save',
+        'menu-export-pdf': 'Export to PDF',
+        'menu-edit': 'Edit',
+        'menu-undo': 'Undo',
+        'menu-redo': 'Redo',
+        'menu-clear': 'Clear all',
+        'menu-view': 'View',
+        'menu-toggle-theme': 'Toggle Theme',
+        'menu-fullscreen': 'Fullscreen',
+        'menu-language': 'Language',
+        'menu-help': 'Help',
+        'menu-about': 'About NotepadMD',
+        'untitled': 'Untitled'
+    }
+};
+
+function setLanguage(lang) {
+    localStorage.setItem('md-notepad-lang', lang);
+    const t = translations[lang];
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (t[key]) el.textContent = t[key];
+    });
+    // Hinweis: ToastUI Sprache erfordert aktuell einen Neustart der App für volle Toolbar-Übersetzung.
+}
+
+function updateStatusBar() {
+    const text = editor.getMarkdown();
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    document.getElementById('word-count').textContent = `${words} Wörter, ${chars} Zeichen`;
+}
+
 // Datei-Handhabung
-const fileInput = /** @type {HTMLInputElement} */ (document.getElementById('file-input'));
 const fileTitle = document.getElementById('file-title');
 const cursorEl = document.getElementById('cursor-pos');
 
-// Datei öffnen
-document.getElementById('menu-open').addEventListener('click', () => {
-    fileInput.click();
-});
+// Globaler Pfad für die aktuelle Datei
+let currentFilePath = null;
 
-fileInput.addEventListener('change', (e) => {
-    const file = /** @type {HTMLInputElement} */(e.target).files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-            easyMDE.value(event.target.result);
-            fileTitle.textContent = `Notepad MD - ${file.name}`;
-        };
-        reader.readAsText(file);
+// Funktion zum Laden einer Datei
+async function loadFile(filePath) {
+    try {
+        const content = await window.electronAPI.readFile(filePath);
+        editor.setMarkdown(content);
+        currentFilePath = filePath;
+        const fileName = filePath.split(/[\\/]/).pop();
+        fileTitle.textContent = `Notepad MD - ${fileName}`;
+    } catch (err) {
+        console.error('Fehler beim Laden:', err);
+    }
+}
+
+// IPC Listener für Dateien vom System (z.B. Doppelklick)
+if (window.electronAPI) {
+    window.electronAPI.onOpenFile((filePath) => {
+        loadFile(filePath);
+    });
+}
+
+// Datei öffnen
+document.getElementById('menu-open').addEventListener('click', async () => {
+    if (window.electronAPI) {
+        const result = await window.electronAPI.showOpenDialog();
+        if (!result.canceled && result.filePaths.length > 0) {
+            loadFile(result.filePaths[0]);
+        }
     }
 });
 
 // Datei speichern
-document.getElementById('menu-save').addEventListener('click', () => {
-    const content = easyMDE.value();
-    const blob = new Blob([content], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'dokument.md';
-    a.click();
-    URL.revokeObjectURL(url);
+document.getElementById('menu-save').addEventListener('click', async () => {
+    if (window.electronAPI) {
+        if (!currentFilePath) {
+            const result = await window.electronAPI.showSaveDialog();
+            if (!result.canceled && result.filePath) {
+                currentFilePath = result.filePath;
+            } else {
+                return;
+            }
+        }
+        
+        try {
+            await window.electronAPI.writeFile(currentFilePath, editor.getMarkdown());
+            const fileName = currentFilePath.split(/[\\/]/).pop();
+            fileTitle.textContent = `Notepad MD - ${fileName}`;
+        } catch (err) {
+            console.error('Fehler beim Speichern:', err);
+        }
+    }
 });
 
 // Neu
 document.getElementById('menu-new').addEventListener('click', () => {
     if (confirm('Möchtest du ein neues Dokument erstellen? Nicht gespeicherte Änderungen gehen verloren.')) {
-        easyMDE.value('');
+        editor.setMarkdown('');
         fileTitle.textContent = 'Notepad MD - Unbenannt';
+        currentFilePath = null;
     }
 });
 
 // Bearbeiten Funktionen
-document.getElementById('menu-undo').addEventListener('click', () => easyMDE.codemirror.undo());
-document.getElementById('menu-redo').addEventListener('click', () => easyMDE.codemirror.redo());
-document.getElementById('menu-clear').addEventListener('click', () => easyMDE.value(''));
+document.getElementById('menu-undo').addEventListener('click', () => {
+    // ToastUI hat kein direktes Undo-API im Public Scope, wir nutzen native Commands
+    document.execCommand('undo');
+});
+document.getElementById('menu-redo').addEventListener('click', () => {
+    document.execCommand('redo');
+});
+document.getElementById('menu-clear').addEventListener('click', () => editor.setMarkdown(''));
 
 // Ansicht Funktionen
 document.getElementById('menu-toggle-theme').addEventListener('click', toggleTheme);
 document.getElementById('menu-fullscreen').addEventListener('click', () => {
-    easyMDE.toggleFullScreen();
+    const el = document.querySelector('.editor-container');
+    if (!document.fullscreenElement) {
+        el.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
 });
 
 // PDF Export (vom Menü aus)
 document.getElementById('menu-export-pdf').addEventListener('click', exportToPDF);
 
 async function exportToPDF() {
-    const content = easyMDE.value();
+    const content = editor.getHTML();
     const renderArea = document.getElementById('pdf-render-area');
     
-    // @ts-ignore
-    renderArea.innerHTML = easyMDE.markdown(content);
+    renderArea.innerHTML = content;
     renderArea.style.display = 'block';
     renderArea.style.padding = '40px';
     renderArea.style.backgroundColor = 'white';
@@ -137,13 +198,18 @@ function toggleTheme() {
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.body.setAttribute('data-theme', newTheme);
     localStorage.setItem('md-notepad-theme', newTheme);
+    
+    // ToastUI Theme wechseln
+    const editorEl = document.querySelector('#editor-widget');
+    if (newTheme === 'dark') {
+        editorEl.classList.add('toastui-editor-dark');
+    } else {
+        editorEl.classList.remove('toastui-editor-dark');
+    }
 }
 
-// Cursor Position Update
-easyMDE.codemirror.on('cursorActivity', () => {
-    const pos = easyMDE.codemirror.getCursor();
-    cursorEl.textContent = `Zeile ${pos.line + 1}, Spalte ${pos.ch + 1}`;
-});
+// Cursor Position (ToastUI hat kein direktes Event dafür wie CodeMirror)
+// Wir lassen es für den Moment weg oder nutzen ein Klick-Event.
 
 // Menü-Dropdown Logik (Klick statt nur Hover)
 document.querySelectorAll('.menu-item').forEach(item => {
@@ -161,8 +227,59 @@ function closeAllMenus() {
 
 window.addEventListener('click', closeAllMenus);
 
+// Keyboard Shortcuts
+window.addEventListener('keydown', (e) => {
+    if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+            case 's':
+                e.preventDefault();
+                document.getElementById('menu-save').click();
+                break;
+            case 'o':
+                e.preventDefault();
+                document.getElementById('menu-open').click();
+                break;
+            case 'n':
+                e.preventDefault();
+                document.getElementById('menu-new').click();
+                break;
+        }
+    }
+});
+
 // Initialisierung
 window.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('md-notepad-theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
+    if (savedTheme === 'dark') {
+        document.querySelector('#editor-widget').classList.add('toastui-editor-dark');
+    }
+
+    // Window Controls
+    if (window.electronAPI) {
+        document.querySelector('.win-btn.minify').addEventListener('click', () => window.electronAPI.minimize());
+        document.querySelector('.win-btn.expand').addEventListener('click', () => window.electronAPI.maximize());
+        document.querySelector('.win-btn.close').addEventListener('click', () => window.electronAPI.close());
+    }
+
+    // Language Initialisierung
+    const savedLang = localStorage.getItem('md-notepad-lang') || 'de';
+    setLanguage(savedLang);
+
+    document.getElementById('lang-de').addEventListener('click', () => {
+        setLanguage('de');
+        alert('Sprache auf Deutsch gestellt. Bitte starte die App neu für volle Toolbar-Übersetzung.');
+    });
+    document.getElementById('lang-en').addEventListener('click', () => {
+        setLanguage('en');
+        alert('Language set to English. Please restart the app for full toolbar translation.');
+    });
+
+    // Hilfe Menü
+    document.getElementById('menu-github').addEventListener('click', () => {
+        window.electronAPI.openExternal('https://github.com/Lassandriel/MD-Editor');
+    });
+    document.getElementById('menu-about').addEventListener('click', () => {
+        alert('NotepadMD v1.0.0\nEin minimalistischer Markdown-Editor.\nErstellt von Lassandriel.');
+    });
 });

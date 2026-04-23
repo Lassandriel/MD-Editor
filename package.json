@@ -1,0 +1,52 @@
+{
+  "name": "md-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "build": {
+    "appId": "com.lassandriel.mdeditor",
+    "productName": "NotepadMD",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "public/logo.png"
+    },
+    "fileAssociations": [
+      {
+        "ext": "md",
+        "name": "Markdown File",
+        "role": "Editor"
+      },
+      {
+        "ext": "txt",
+        "name": "Text File",
+        "role": "Editor"
+      }
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lassandriel/MD-Editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Lassandriel/MD-Editor/issues"
+  },
+  "homepage": "https://github.com/Lassandriel/MD-Editor#readme",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "electron": "^41.3.0",
+    "electron-builder": "^26.8.1",
+    "eslint": "^10.2.1"
+  }
+}

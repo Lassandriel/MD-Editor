@@ -12,8 +12,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=Fira+Code:wght@400&display=swap" rel="stylesheet">
     
     <!-- Libraries (CDNs) -->
-    <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-    <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/toastui-editor.min.css">
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor/latest/theme/toastui-editor-dark.min.css">
+    <script src="https://uicdn.toast.com/editor/latest/toastui-editor-all.min.js"></script>
+    
+    <!-- Color Picker Plugin -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.css">
+    <script src="https://uicdn.toast.com/tui-color-picker/latest/tui-color-picker.min.js"></script>
+    <link rel="stylesheet" href="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.css">
+    <script src="https://uicdn.toast.com/editor-plugin-color-syntax/latest/toastui-editor-plugin-color-syntax.min.js"></script>
+    
+    <!-- ToastUI Locales -->
+    <script src="https://uicdn.toast.com/editor/latest/i18n/de-de.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -21,7 +32,7 @@
     <div id="app">
         <header class="window-header">
             <div class="window-title">
-                <img src="https://img.icons8.com/color/48/markdown.png" width="16" height="16" alt="icon">
+                <img src="public/logo.png" width="16" height="16" alt="icon">
                 <span id="file-title">Notepad MD - Unbenannt</span>
             </div>
             <div class="window-controls">
@@ -33,46 +44,62 @@
 
         <nav class="menu-bar">
             <div class="menu-item">
-                <span>Datei</span>
+                <span data-i18n="menu-file">Datei</span>
                 <div class="dropdown">
-                    <div id="menu-new">Neu</div>
-                    <div id="menu-open">Öffnen...</div>
-                    <div id="menu-save">Speichern</div>
+                    <div id="menu-new" title="Neues Dokument (Strg+N)" data-i18n="menu-new">Neu</div>
+                    <div id="menu-open" title="Dokument öffnen (Strg+O)" data-i18n="menu-open">Öffnen...</div>
+                    <div id="menu-save" title="Speichern (Strg+S)" data-i18n="menu-save">Speichern</div>
                     <div class="divider"></div>
-                    <div id="menu-export-pdf">Als PDF exportieren</div>
+                    <div id="menu-export-pdf" data-i18n="menu-export-pdf">Als PDF exportieren</div>
                 </div>
             </div>
             <div class="menu-item">
-                <span>Bearbeiten</span>
+                <span data-i18n="menu-edit">Bearbeiten</span>
                 <div class="dropdown">
-                    <div id="menu-undo">Rückgängig</div>
-                    <div id="menu-redo">Wiederholen</div>
+                    <div id="menu-undo" title="Rückgängig (Strg+Z)" data-i18n="menu-undo">Rückgängig</div>
+                    <div id="menu-redo" title="Wiederholen (Strg+Y)" data-i18n="menu-redo">Wiederholen</div>
                     <div class="divider"></div>
-                    <div id="menu-clear">Alles löschen</div>
+                    <div id="menu-clear" data-i18n="menu-clear">Alles löschen</div>
                 </div>
             </div>
             <div class="menu-item">
-                <span>Ansicht</span>
+                <span data-i18n="menu-view">Ansicht</span>
                 <div class="dropdown">
-                    <div id="menu-toggle-theme">Theme umschalten</div>
-                    <div id="menu-fullscreen">Vollbild</div>
+                    <div id="menu-toggle-theme" data-i18n="menu-toggle-theme">Theme umschalten</div>
+                    <div id="menu-fullscreen" data-i18n="menu-fullscreen">Vollbild</div>
+                    <div class="divider"></div>
+                    <div class="menu-item submenu">
+                        <span data-i18n="menu-language">Sprache</span>
+                        <div class="dropdown side">
+                            <div id="lang-de">Deutsch</div>
+                            <div id="lang-en">English</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="menu-item">
+                <span data-i18n="menu-help">Hilfe</span>
+                <div class="dropdown">
+                    <div id="menu-github">GitHub Repository</div>
+                    <div class="divider"></div>
+                    <div id="menu-about" data-i18n="menu-about">Über NotepadMD</div>
                 </div>
             </div>
         </nav>
         
         <main class="editor-container">
-            <textarea id="my-text-editor"></textarea>
+            <div id="editor-widget"></div>
         </main>
         
         <footer class="status-bar">
+            <div class="status-item" id="word-count">0 Wörter, 0 Zeichen</div>
             <div class="status-item" id="cursor-pos">Zeile 1, Spalte 1</div>
             <div class="status-item">UTF-8</div>
             <div class="status-item">Markdown</div>
         </footer>
     </div>
 
-    <!-- Hidden file input for compatibility -->
-    <input type="file" id="file-input" style="display: none;" accept=".md,.txt">
+    <!-- PDF Render Area -->
     <div id="pdf-render-area" style="display: none;"></div>
 
     <script src="script.js"></script>

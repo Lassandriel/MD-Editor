@@ -50,6 +50,7 @@ body {
     align-items: center;
     padding: 0 8px;
     border-bottom: 1px solid var(--win-border);
+    -webkit-app-region: drag; /* Ermöglicht das Verschieben des Fensters */
 }
 
 .window-title {
@@ -57,11 +58,13 @@ body {
     align-items: center;
     gap: 8px;
     font-size: 12px;
+    pointer-events: none; /* Verhindert, dass Text ausgewählt wird beim Ziehen */
 }
 
 .window-controls {
     display: flex;
     height: 100%;
+    -webkit-app-region: no-drag; /* Buttons müssen klickbar bleiben */
 }
 
 .win-btn {
@@ -76,12 +79,56 @@ body {
 
 .win-btn:hover { background-color: var(--win-hover); }
 
+.win-btn.close:hover {
+    background-color: #e81123;
+    color: white;
+}
+
+/* Icons für die Buttons */
+.win-btn span {
+    display: block;
+    border-style: solid;
+    border-color: currentColor;
+    border-width: 0;
+}
+
+.minify span {
+    width: 10px;
+    border-bottom-width: 1px;
+}
+
+.expand span {
+    width: 10px;
+    height: 10px;
+    border-width: 1px;
+}
+
+.close span {
+    position: relative;
+    width: 10px;
+    height: 10px;
+}
+
+.close span::before, .close span::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: currentColor;
+}
+
+.close span::before { transform: rotate(45deg); }
+.close span::after { transform: rotate(-45deg); }
+
 /* Menu Bar */
 .menu-bar {
     display: flex;
     background-color: var(--win-header-bg);
     padding: 2px 8px;
     border-bottom: 1px solid var(--win-border);
+    -webkit-app-region: no-drag; /* Menü muss klickbar bleiben */
 }
 
 .menu-item {
@@ -108,7 +155,18 @@ body {
     padding: 4px 0;
 }
 
-.menu-item.active .dropdown {
+.menu-item.active > .dropdown {
+    display: block;
+}
+
+/* Submenu / Side Dropdown */
+.submenu .dropdown.side {
+    left: 100%;
+    top: 0;
+    display: none;
+}
+
+.submenu:hover > .dropdown.side {
     display: block;
 }
 
@@ -140,19 +198,17 @@ body {
 
 [data-theme="dark"] .editor-container { background-color: #1c1c1c; }
 
-/* EasyMDE */
-.editor-toolbar {
+/* ToastUI Custom Styling */
+.toastui-editor-defaultUI {
     border: none !important;
-    border-bottom: 1px solid var(--win-border) !important;
-    background-color: var(--win-header-bg) !important;
-    padding: 4px !important;
 }
 
-.CodeMirror {
-    height: calc(100vh - 120px) !important;
-    font-family: 'Fira Code', monospace !important;
-    font-size: 14px !important;
-    padding: 20px !important;
+.toastui-editor-contents {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    font-size: 16px !important;
+}
+
+.toastui-editor-ww-container {
     background-color: transparent !important;
 }
 
