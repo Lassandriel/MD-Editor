@@ -10,7 +10,7 @@
   },
   "build": {
     "appId": "com.lassandriel.mdeditor",
-    "productName": "NotepadMD",
+    "productName": "MD Editor",
     "directories": {
       "output": "dist"
     },

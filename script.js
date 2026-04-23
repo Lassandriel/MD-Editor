@@ -37,7 +37,7 @@ const translations = {
         'menu-fullscreen': 'Vollbild',
         'menu-language': 'Sprache',
         'menu-help': 'Hilfe',
-        'menu-about': 'Über NotepadMD',
+        'menu-about': 'Über MD Editor',
         'untitled': 'Unbenannt'
     },
     en: {
@@ -55,7 +55,7 @@ const translations = {
         'menu-fullscreen': 'Fullscreen',
         'menu-language': 'Language',
         'menu-help': 'Help',
-        'menu-about': 'About NotepadMD',
+        'menu-about': 'About MD Editor',
         'untitled': 'Untitled'
     }
 };
@@ -280,6 +280,6 @@ window.addEventListener('DOMContentLoaded', () => {
         window.electronAPI.openExternal('https://github.com/Lassandriel/MD-Editor');
     });
     document.getElementById('menu-about').addEventListener('click', () => {
-        alert('NotepadMD v1.0.0\nEin minimalistischer Markdown-Editor.\nErstellt von Lassandriel.');
+        alert('MD Editor v1.0.0\nEin minimalistischer Markdown-Editor.\nErstellt von Lassandriel.');
     });
 });

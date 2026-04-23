@@ -1,4 +1,4 @@
-# 📝 NotepadMD
+# 📝 MD Editor
 
 A minimalist, high-performance Markdown editor with a **WYSIWYG** (Wordpad-like) experience. Built with Electron, it offers a native desktop feel with all the power of Markdown.
 
