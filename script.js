@@ -14,8 +14,8 @@ const editor = new toastui.Editor({
         ['code', 'codeblock']
     ],
     plugins: [toastui.Editor.plugin.colorSyntax],
-    theme: localStorage.getItem('md-notepad-theme') === 'dark' ? 'dark' : 'light',
-    language: localStorage.getItem('md-notepad-lang') === 'en' ? 'en-US' : 'de-DE',
+    theme: localStorage.getItem('md-editor-theme') === 'dark' ? 'dark' : 'light',
+    language: localStorage.getItem('md-editor-lang') === 'en' ? 'en-US' : 'de-DE',
     events: {
         change: () => updateStatusBar()
     }
@@ -61,7 +61,7 @@ const translations = {
 };
 
 function setLanguage(lang) {
-    localStorage.setItem('md-notepad-lang', lang);
+    localStorage.setItem('md-editor-lang', lang);
     const t = translations[lang];
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
@@ -91,7 +91,7 @@ async function loadFile(filePath) {
         editor.setMarkdown(content);
         currentFilePath = filePath;
         const fileName = filePath.split(/[\\/]/).pop();
-        fileTitle.textContent = `Notepad MD - ${fileName}`;
+        fileTitle.textContent = `MD Editor - ${fileName}`;
     } catch (err) {
         console.error('Fehler beim Laden:', err);
     }
@@ -129,7 +129,7 @@ document.getElementById('menu-save').addEventListener('click', async () => {
         try {
             await window.electronAPI.writeFile(currentFilePath, editor.getMarkdown());
             const fileName = currentFilePath.split(/[\\/]/).pop();
-            fileTitle.textContent = `Notepad MD - ${fileName}`;
+            fileTitle.textContent = `MD Editor - ${fileName}`;
         } catch (err) {
             console.error('Fehler beim Speichern:', err);
         }
@@ -140,7 +140,7 @@ document.getElementById('menu-save').addEventListener('click', async () => {
 document.getElementById('menu-new').addEventListener('click', () => {
     if (confirm('Möchtest du ein neues Dokument erstellen? Nicht gespeicherte Änderungen gehen verloren.')) {
         editor.setMarkdown('');
-        fileTitle.textContent = 'Notepad MD - Unbenannt';
+        fileTitle.textContent = 'MD Editor - Unbenannt';
         currentFilePath = null;
     }
 });
@@ -197,7 +197,7 @@ function toggleTheme() {
     const currentTheme = document.body.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     document.body.setAttribute('data-theme', newTheme);
-    localStorage.setItem('md-notepad-theme', newTheme);
+    localStorage.setItem('md-editor-theme', newTheme);
     
     // ToastUI Theme wechseln
     const editorEl = document.querySelector('#editor-widget');
@@ -249,7 +249,7 @@ window.addEventListener('keydown', (e) => {
 
 // Initialisierung
 window.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('md-notepad-theme') || 'light';
+    const savedTheme = localStorage.getItem('md-editor-theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     if (savedTheme === 'dark') {
         document.querySelector('#editor-widget').classList.add('toastui-editor-dark');
@@ -263,7 +263,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // Language Initialisierung
-    const savedLang = localStorage.getItem('md-notepad-lang') || 'de';
+    const savedLang = localStorage.getItem('md-editor-lang') || 'de';
     setLanguage(savedLang);
 
     document.getElementById('lang-de').addEventListener('click', () => {

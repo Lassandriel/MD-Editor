@@ -2,12 +2,12 @@
 
 A minimalist, high-performance Markdown editor with a **WYSIWYG** (Wordpad-like) experience. Built with Electron, it offers a native desktop feel with all the power of Markdown.
 
-![NotepadMD Logo](public/logo.png)
+![MD Editor Logo](public/logo.png)
 
 ## ✨ Features
 
 - **WYSIWYG Editing**: Write Markdown like you're using Wordpad. No more confusing symbols unless you want them!
-- **Native Windows Integration**: Associate `.md` and `.txt` files directly with NotepadMD. Double-click to open!
+- **Native Windows Integration**: Associate `.md` and `.txt` files directly with MD Editor. Double-click to open!
 - **Multi-Language Support**: Easily switch between **German** and **English** interfaces.
 - **Modern UI**: Custom window controls and a sleek, responsive design with **Dark Mode** support.
 - **Color Picker**: Highlight your text with custom colors using the built-in color syntax plugin.
