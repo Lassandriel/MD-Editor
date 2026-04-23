@@ -203,6 +203,45 @@ body {
     border: none !important;
 }
 
+/* --- FINALE THEME-ABHERTUNG --- */
+
+/* 1. Generelle Textfarben (WYSIWYG & Vorschau) */
+.toastui-editor-contents,
+.toastui-editor-contents *,
+.toastui-editor-ww-container *,
+.toastui-editor-md-container * {
+    color: var(--win-text); /* Kein !important hier, damit Code-Regeln greifen können */
+}
+
+/* 2. Zwinge Paragraphs und Headlines zur Theme-Farbe */
+.toastui-editor-contents p,
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents li,
+.toastui-editor-ww-container [contenteditable] {
+    color: var(--win-text) !important;
+}
+
+/* 3. Code-Blöcke & Inline-Code (In beiden Themes dunkel mit heller Schrift) */
+.toastui-editor-contents code,
+.toastui-editor-contents pre,
+.toastui-editor-ww-code-block,
+.toastui-editor-ww-code-block *,
+.toastui-editor-ww-container code,
+.toastui-editor-md-container .cm-keyword,
+.toastui-editor-md-container .cm-variable {
+    color: #e0e0e0 !important;
+    background-color: #262626 !important;
+}
+
+/* 4. Spezifisch für Inline-Code im Text */
+code {
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+}
+
+
 .toastui-editor-contents {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
     font-size: 16px !important;
@@ -211,6 +250,42 @@ body {
 .toastui-editor-ww-container {
     background-color: transparent !important;
 }
+
+/* Toolbar Theme Fix & Premium Look */
+.toastui-editor-defaultUI-toolbar {
+    background-color: var(--win-header-bg) !important;
+    border-bottom: 1px solid var(--win-border) !important;
+    padding: 4px !important;
+    height: auto !important;
+}
+
+.toastui-editor-defaultUI-toolbar button {
+    border: none !important; /* Weg mit den hässlichen Kästen */
+    background-color: transparent !important;
+    border-radius: 4px !important;
+    margin: 2px !important;
+    transition: background-color 0.2s !important;
+}
+
+.toastui-editor-defaultUI-toolbar button:hover {
+    background-color: var(--win-hover) !important;
+}
+
+/* Icons im Dark Mode hell machen, im Light Mode dunkel */
+[data-theme="dark"] .toastui-editor-defaultUI-toolbar button {
+    filter: brightness(0) invert(1) !important;
+}
+
+[data-theme="light"] .toastui-editor-defaultUI-toolbar button {
+    filter: none !important;
+}
+
+/* Trennlinien in der Toolbar */
+.toastui-editor-toolbar-divider {
+    background-color: var(--win-border) !important;
+    margin: 5px 4px !important;
+}
+
 
 /* Status Bar */
 .status-bar {

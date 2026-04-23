@@ -1,25 +1,6 @@
-// ToastUI Editor Initialisierung (WYSIWYG Fokus)
-const editor = new toastui.Editor({
-    el: document.querySelector('#editor-widget'),
-    height: '100%',
-    initialEditType: 'wysiwyg',
-    previewStyle: 'tab',
-    hideModeSwitch: true, // Versteckt den Code-Modus für ein sauberes Wordpad-Gefühl
-    usageStatistics: false,
-    toolbarItems: [
-        ['heading', 'bold', 'italic', 'strike'],
-        ['hr', 'quote'],
-        ['ul', 'ol', 'task', 'indent', 'outdent'],
-        ['table', 'image', 'link'],
-        ['code', 'codeblock']
-    ],
-    plugins: [toastui.Editor.plugin.colorSyntax],
-    theme: localStorage.getItem('md-editor-theme') === 'dark' ? 'dark' : 'light',
-    language: localStorage.getItem('md-editor-lang') === 'en' ? 'en-US' : 'de-DE',
-    events: {
-        change: () => updateStatusBar()
-    }
-});
+// Globaler Editor-Scope
+let editor;
+let currentFilePath = null;
 
 const translations = {
     de: {
@@ -62,264 +43,197 @@ const translations = {
 
 function setLanguage(lang) {
     localStorage.setItem('md-editor-lang', lang);
-    const t = translations[lang];
+    const t = translations[lang] || translations.en;
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (t[key]) el.textContent = t[key];
     });
-    // Hinweis: ToastUI Sprache erfordert aktuell einen Neustart der App für volle Toolbar-Übersetzung.
 }
 
 function updateStatusBar() {
+    if (!editor) return;
     const text = editor.getMarkdown();
     const words = text.trim() ? text.trim().split(/\s+/).length : 0;
     const chars = text.length;
     document.getElementById('word-count').textContent = `${words} Wörter, ${chars} Zeichen`;
 }
 
-// Datei-Handhabung
-const fileTitle = document.getElementById('file-title');
-const cursorEl = document.getElementById('cursor-pos');
-
-// Globaler Pfad für die aktuelle Datei
-let currentFilePath = null;
-
-// Funktion zum Laden einer Datei
-async function loadFile(filePath) {
-    try {
-        const content = await window.electronAPI.readFile(filePath);
-        editor.setMarkdown(content);
-        currentFilePath = filePath;
-        const fileName = filePath.split(/[\\/]/).pop();
-        fileTitle.textContent = `MD Editor - ${fileName}`;
-    } catch (err) {
-        console.error('Fehler beim Laden:', err);
-    }
-}
-
-// IPC Listener für Dateien vom System (z.B. Doppelklick)
-if (window.electronAPI) {
-    window.electronAPI.onOpenFile((filePath) => {
-        loadFile(filePath);
-    });
-}
-
-// Datei öffnen
-document.getElementById('menu-open').addEventListener('click', async () => {
-    if (window.electronAPI) {
-        const result = await window.electronAPI.showOpenDialog();
-        if (!result.canceled && result.filePaths.length > 0) {
-            loadFile(result.filePaths[0]);
-        }
-    } else {
-        // Web-Fallback: Klick auf verstecktes Input-Feld
-        document.getElementById('web-file-input').click();
-    }
-});
-
-// Listener für Web-Datei-Input
-document.getElementById('web-file-input').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            editor.setMarkdown(e.target.result);
-            fileTitle.textContent = `MD Editor - ${file.name}`;
-        };
-        reader.readAsText(file);
-    }
-});
-
-// Datei speichern
-document.getElementById('menu-save').addEventListener('click', async () => {
-    if (window.electronAPI) {
-        if (!currentFilePath) {
-            const result = await window.electronAPI.showSaveDialog();
-            if (!result.canceled && result.filePath) {
-                currentFilePath = result.filePath;
-            } else {
-                return;
-            }
-        }
-        
-        try {
-            await window.electronAPI.writeFile(currentFilePath, editor.getMarkdown());
-            const fileName = currentFilePath.split(/[\\/]/).pop();
-            fileTitle.textContent = `MD Editor - ${fileName}`;
-        } catch (err) {
-            console.error('Fehler beim Speichern:', err);
-        }
-    } else {
-        // Web-Fallback: Download als Datei
-        const content = editor.getMarkdown();
-        const blob = new Blob([content], { type: 'text/markdown' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'notiz.md';
-        a.click();
-        URL.revokeObjectURL(url);
-    }
-});
-
-// Neu
-document.getElementById('menu-new').addEventListener('click', () => {
-    if (confirm('Möchtest du ein neues Dokument erstellen? Nicht gespeicherte Änderungen gehen verloren.')) {
-        editor.setMarkdown('');
-        fileTitle.textContent = 'MD Editor - Unbenannt';
-        currentFilePath = null;
-    }
-});
-
-// Bearbeiten Funktionen
-document.getElementById('menu-undo').addEventListener('click', () => {
-    // ToastUI hat kein direktes Undo-API im Public Scope, wir nutzen native Commands
-    document.execCommand('undo');
-});
-document.getElementById('menu-redo').addEventListener('click', () => {
-    document.execCommand('redo');
-});
-document.getElementById('menu-clear').addEventListener('click', () => editor.setMarkdown(''));
-
-// Ansicht Funktionen
-document.getElementById('menu-toggle-theme').addEventListener('click', toggleTheme);
-document.getElementById('menu-fullscreen').addEventListener('click', () => {
-    const el = document.querySelector('.editor-container');
-    if (!document.fullscreenElement) {
-        el.requestFullscreen();
-    } else {
-        document.exitFullscreen();
-    }
-});
-
-// PDF Export (vom Menü aus)
-document.getElementById('menu-export-pdf').addEventListener('click', exportToPDF);
-
-async function exportToPDF() {
-    const content = editor.getHTML();
-    const renderArea = document.getElementById('pdf-render-area');
-    
-    renderArea.innerHTML = content;
-    renderArea.style.display = 'block';
-    renderArea.style.padding = '40px';
-    renderArea.style.backgroundColor = 'white';
-    renderArea.style.color = 'black';
-
-    const opt = {
-        margin: 10,
-        filename: 'notiz.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    
-    // @ts-ignore
-    html2pdf().set(opt).from(renderArea).save().then(() => {
-        renderArea.style.display = 'none';
-    });
-}
-
-function toggleTheme() {
-    const currentTheme = document.body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.body.setAttribute('data-theme', newTheme);
-    localStorage.setItem('md-editor-theme', newTheme);
-    
-    // ToastUI Theme wechseln
-    const editorEl = document.querySelector('#editor-widget');
-    if (newTheme === 'dark') {
-        editorEl.classList.add('toastui-editor-dark');
-    } else {
-        editorEl.classList.remove('toastui-editor-dark');
-    }
-}
-
-// Cursor Position (ToastUI hat kein direktes Event dafür wie CodeMirror)
-// Wir lassen es für den Moment weg oder nutzen ein Klick-Event.
-
-// Menü-Dropdown Logik (Klick statt nur Hover)
-document.querySelectorAll('.menu-item').forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const wasActive = item.classList.contains('active');
-        closeAllMenus();
-        if (!wasActive) item.classList.add('active');
-    });
-});
-
-function closeAllMenus() {
-    document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
-}
-
-window.addEventListener('click', closeAllMenus);
-
-// Keyboard Shortcuts
-window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey) {
-        switch (e.key.toLowerCase()) {
-            case 's':
-                e.preventDefault();
-                document.getElementById('menu-save').click();
-                break;
-            case 'o':
-                e.preventDefault();
-                document.getElementById('menu-open').click();
-                break;
-            case 'n':
-                e.preventDefault();
-                document.getElementById('menu-new').click();
-                break;
-        }
-    }
-});
-
-// Initialisierung
+// Initialisierung erst wenn DOM bereit
 window.addEventListener('DOMContentLoaded', () => {
+    // 1. Editor Initialisierung
+    try {
+        editor = new toastui.Editor({
+            el: document.querySelector('#editor-widget'),
+            height: '100%',
+            initialEditType: 'wysiwyg',
+            previewStyle: 'tab',
+            hideModeSwitch: true,
+            usageStatistics: false,
+            toolbarItems: [
+                ['heading', 'bold', 'italic', 'strike'],
+                ['hr', 'quote'],
+                ['ul', 'ol', 'task', 'indent', 'outdent'],
+                ['table', 'image', 'link'],
+                ['code', 'codeblock']
+            ],
+            plugins: [toastui.Editor.plugin.colorSyntax],
+            theme: localStorage.getItem('md-editor-theme') === 'dark' ? 'dark' : 'light',
+            language: localStorage.getItem('md-editor-lang') === 'en' ? 'en-US' : 'de-DE',
+            events: {
+                change: () => updateStatusBar()
+            }
+        });
+    } catch (e) {
+        console.error("Editor konnte nicht geladen werden:", e);
+        alert("Fehler: Der Editor konnte nicht geladen werden. Bitte Seite neu laden.");
+        return;
+    }
+
+    // 2. UI Status Setup
     const savedTheme = localStorage.getItem('md-editor-theme') || 'light';
     document.body.setAttribute('data-theme', savedTheme);
     if (savedTheme === 'dark') {
         document.querySelector('#editor-widget').classList.add('toastui-editor-dark');
     }
+    const savedLang = localStorage.getItem('md-editor-lang') || 'de';
+    setLanguage(savedLang);
 
-    // Electron-Check für UI
+    // 3. Electron vs Web Check
     if (window.electronAPI) {
         document.body.classList.add('is-electron');
+        window.electronAPI.onOpenFile((filePath) => loadFile(filePath));
+        
         document.querySelector('.win-btn.minify').addEventListener('click', () => window.electronAPI.minimize());
         document.querySelector('.win-btn.expand').addEventListener('click', () => window.electronAPI.maximize());
         document.querySelector('.win-btn.close').addEventListener('click', () => window.electronAPI.close());
     }
 
-    // Language Initialisierung
-    const savedLang = localStorage.getItem('md-editor-lang') || 'de';
-    setLanguage(savedLang);
+    // 4. Datei-Logik
+    const fileTitle = document.getElementById('file-title');
 
-    document.getElementById('lang-de').addEventListener('click', () => {
-        setLanguage('de');
-        alert('Sprache auf Deutsch gestellt. Bitte starte die App neu für volle Toolbar-Übersetzung.');
-    });
-    document.getElementById('lang-en').addEventListener('click', () => {
-        setLanguage('en');
-        alert('Language set to English. Please restart the app for full toolbar translation.');
-    });
+    async function loadFile(filePath) {
+        try {
+            const content = await window.electronAPI.readFile(filePath);
+            editor.setMarkdown(content);
+            currentFilePath = filePath;
+            const fileName = filePath.split(/[\\/]/).pop();
+            fileTitle.textContent = `MD Editor - ${fileName}`;
+        } catch (err) {
+            console.error('Fehler beim Laden:', err);
+        }
+    }
 
-    // Hilfe Menü
-    document.getElementById('menu-github').addEventListener('click', () => {
-        const url = 'https://github.com/Lassandriel/MD-Editor';
+    // Menü-Events
+    document.getElementById('menu-open').addEventListener('click', async () => {
         if (window.electronAPI) {
-            window.electronAPI.openExternal(url);
+            const result = await window.electronAPI.showOpenDialog();
+            if (!result.canceled && result.filePaths.length > 0) {
+                loadFile(result.filePaths[0]);
+            }
         } else {
-            window.open(url, '_blank');
+            document.getElementById('web-file-input').click();
         }
     });
 
+    document.getElementById('web-file-input').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                editor.setMarkdown(ev.target.result);
+                fileTitle.textContent = `MD Editor - ${file.name}`;
+            };
+            reader.readAsText(file);
+        }
+    });
+
+    document.getElementById('menu-save').addEventListener('click', async () => {
+        if (window.electronAPI) {
+            if (!currentFilePath) {
+                const result = await window.electronAPI.showSaveDialog();
+                if (!result.canceled && result.filePath) currentFilePath = result.filePath;
+                else return;
+            }
+            await window.electronAPI.writeFile(currentFilePath, editor.getMarkdown());
+            fileTitle.textContent = `MD Editor - ${currentFilePath.split(/[\\/]/).pop()}`;
+        } else {
+            const blob = new Blob([editor.getMarkdown()], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'notiz.md';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    });
+
+    document.getElementById('menu-new').addEventListener('click', () => {
+        if (confirm('Neues Dokument erstellen?')) {
+            editor.setMarkdown('');
+            fileTitle.textContent = 'MD Editor - Unbenannt';
+            currentFilePath = null;
+        }
+    });
+
+    // Menü-Dropdowns
+    document.querySelectorAll('.menu-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const wasActive = item.classList.contains('active');
+            closeAllMenus();
+            if (!wasActive) item.classList.add('active');
+        });
+    });
+
+    function closeAllMenus() {
+        document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active'));
+    }
+    window.addEventListener('click', closeAllMenus);
+
+    // Sonstige UI Events
+    document.getElementById('menu-undo').addEventListener('click', () => document.execCommand('undo'));
+    document.getElementById('menu-redo').addEventListener('click', () => document.execCommand('redo'));
+    document.getElementById('menu-clear').addEventListener('click', () => editor.setMarkdown(''));
+    document.getElementById('menu-toggle-theme').addEventListener('click', toggleTheme);
+    document.getElementById('menu-fullscreen').addEventListener('click', toggleFullscreen);
+    document.getElementById('menu-export-pdf').addEventListener('click', exportToPDF);
+    
+    document.getElementById('lang-de').addEventListener('click', () => { setLanguage('de'); alert('Sprache geändert.'); });
+    document.getElementById('lang-en').addEventListener('click', () => { setLanguage('en'); alert('Language changed.'); });
+
+    document.getElementById('menu-github').addEventListener('click', () => {
+        const url = 'https://github.com/Lassandriel/MD-Editor';
+        if (window.electronAPI) window.electronAPI.openExternal(url);
+        else window.open(url, '_blank');
+    });
+
     const aboutModal = document.getElementById('about-modal');
-    document.getElementById('menu-about').addEventListener('click', () => {
-        aboutModal.style.display = 'block';
-    });
-    document.getElementById('close-about').addEventListener('click', () => {
-        aboutModal.style.display = 'none';
-    });
-    window.addEventListener('click', (e) => {
-        if (e.target === aboutModal) aboutModal.style.display = 'none';
-    });
+    document.getElementById('menu-about').addEventListener('click', () => aboutModal.style.display = 'block');
+    document.getElementById('close-about').addEventListener('click', () => aboutModal.style.display = 'none');
+    window.addEventListener('click', (e) => { if (e.target === aboutModal) aboutModal.style.display = 'none'; });
+
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('md-editor-theme', newTheme);
+        const editorEl = document.querySelector('#editor-widget');
+        if (newTheme === 'dark') editorEl.classList.add('toastui-editor-dark');
+        else editorEl.classList.remove('toastui-editor-dark');
+    }
+
+    function toggleFullscreen() {
+        const el = document.querySelector('.editor-container');
+        if (!document.fullscreenElement) el.requestFullscreen();
+        else document.exitFullscreen();
+    }
+
+    async function exportToPDF() {
+        const renderArea = document.getElementById('pdf-render-area');
+        renderArea.innerHTML = editor.getHTML();
+        renderArea.style.display = 'block';
+        const opt = { margin: 10, filename: 'notiz.pdf', jsPDF: { unit: 'mm', format: 'a4' } };
+        // @ts-ignore
+        html2pdf().set(opt).from(renderArea).save().then(() => renderArea.style.display = 'none');
+    }
 });
