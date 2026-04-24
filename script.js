@@ -62,19 +62,18 @@ function updateStatusBar() {
 window.addEventListener('DOMContentLoaded', () => {
     // 1. Sicherheits-Check für Bibliotheken
     if (typeof toastui === 'undefined' || !toastui.Editor) {
-        console.error("ToastUI konnte nicht geladen werden. CDN eventuell blockiert?");
-        alert("Kritischer Fehler: Die Editor-Bibliothek konnte nicht geladen werden. Bitte prüfe deine Internetverbindung oder schalte Ad-Blocker/Tracking-Schutz kurzzeitig aus.");
+        alert("Kritischer Fehler: Die Editor-Bibliothek wurde nicht geladen.");
         return;
     }
 
-    // 2. Editor Initialisierung
+    // 2. Editor Initialisierung (Jetzt wieder mit vollem Komfort, aber sicher!)
     try {
         editor = new toastui.Editor({
             el: document.querySelector('#editor-widget'),
             height: '100%',
             initialEditType: 'wysiwyg',
-            previewStyle: 'tab',
-            hideModeSwitch: true,
+            previewStyle: 'vertical', // Side-by-side Vorschau statt Reiter oben
+            hideModeSwitch: false,
             usageStatistics: false,
             toolbarItems: [
                 ['heading', 'bold', 'italic', 'strike'],
@@ -83,21 +82,28 @@ window.addEventListener('DOMContentLoaded', () => {
                 ['table', 'image', 'link'],
                 ['code', 'codeblock']
             ],
-            plugins: [toastui.Editor.plugin.colorSyntax],
             theme: localStorage.getItem('md-editor-theme') === 'dark' ? 'dark' : 'light',
             language: localStorage.getItem('md-editor-lang') === 'en' ? 'en-US' : 'de-DE',
             events: {
                 change: () => updateStatusBar()
             }
         });
+        console.log("Editor erfolgreich initialisiert!");
+        
+        // Lade-Screen mit einer sanften Verzögerung ausblenden
+        setTimeout(() => {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.add('hidden');
+        }, 300);
+        
     } catch (e) {
-        console.error("Editor konnte nicht geladen werden:", e);
-        alert("Fehler: Der Editor konnte nicht geladen werden. Bitte Seite neu laden.");
+        console.error("Detaillierter Fehler:", e);
+        alert("Fehler bei der Konfiguration: " + e.message);
         return;
     }
 
     // 2. UI Status Setup
-    const savedTheme = localStorage.getItem('md-editor-theme') || 'light';
+    const savedTheme = localStorage.getItem('md-editor-theme') || 'dark';
     document.body.setAttribute('data-theme', savedTheme);
     if (savedTheme === 'dark') {
         document.querySelector('#editor-widget').classList.add('toastui-editor-dark');

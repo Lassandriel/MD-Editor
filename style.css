@@ -1,22 +1,35 @@
-:root {
-    --win-bg: #f3f3f3;
-    --win-header-bg: #ffffff;
-    --win-border: #d0d0d0;
-    --win-text: #1a1a1a;
-    --win-accent: #0078d4;
-    --win-hover: #e5e5e5;
-    --status-bg: #f3f3f3;
-    --menu-shadow: 0 4px 8px rgba(0,0,0,0.1);
+@font-face {
+    font-family: 'Fira Code';
+    src: url('lib/fonts/firacode.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
 }
 
-[data-theme="dark"] {
-    --win-bg: #1c1c1c;
-    --win-header-bg: #2d2d2d;
-    --win-border: #404040;
-    --win-text: #ffffff;
-    --win-accent: #0078d4;
-    --win-hover: #3d3d3d;
-    --status-bg: #1c1c1c;
+:root {
+    --bg-primary: #1e1e1e;
+    --bg-secondary: #252526;
+    --text-primary: #cccccc;
+    --text-secondary: #999999;
+    --accent-color: #007acc;
+    --win-border: #333333;
+    --toolbar-bg: #2d2d2d;
+    --hover-bg: #3c3c3c;
+    --status-bg: #252526;
+    --font-ui: 'Segoe UI', system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+}
+
+[data-theme="light"] {
+    --bg-primary: #ffffff;
+    --bg-secondary: #f3f3f3;
+    --text-primary: #1a1a1a;
+    --text-secondary: #666666;
+    --accent-color: #0078d4;
+    --win-border: #d0d0d0;
+    --toolbar-bg: #ffffff;
+    --hover-bg: #e5e5e5;
+    --status-bg: #e1e1e1;
 }
 
 * {
@@ -26,19 +39,20 @@
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--win-bg);
-    color: var(--win-text);
+    font-family: var(--font-ui);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 }
 
-#app {
+.app-container {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* Windows Header */
@@ -303,6 +317,45 @@ code {
 .status-item {
     padding-left: 12px;
     border-left: 1px solid var(--win-border);
+}
+
+/* Loading Overlay */
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    transition: opacity 0.5s ease-out, visibility 0.5s;
+}
+
+#loading-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.loader-content {
+    text-align: center;
+    color: var(--text-primary);
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent-color);
+    animation: spin 1s ease-in-out infinite;
+    margin: 0 auto 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 
 /* Modal Styling */
