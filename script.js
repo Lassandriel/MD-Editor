@@ -66,13 +66,17 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. Editor Initialisierung (Jetzt wieder mit vollem Komfort, aber sicher!)
+    // 2. UI Status Setup (Vor dem Editor, damit die Sprache stimmt)
+    const savedTheme = localStorage.getItem('md-editor-theme') || 'dark';
+    const savedLang = localStorage.getItem('md-editor-lang') || 'en';
+
+    // 3. Editor Initialisierung
     try {
         editor = new toastui.Editor({
             el: document.querySelector('#editor-widget'),
             height: '100%',
             initialEditType: 'wysiwyg',
-            previewStyle: 'vertical', // Side-by-side Vorschau statt Reiter oben
+            previewStyle: 'vertical',
             hideModeSwitch: false,
             usageStatistics: false,
             toolbarItems: [
@@ -82,8 +86,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 ['table', 'image', 'link'],
                 ['code', 'codeblock']
             ],
-            theme: localStorage.getItem('md-editor-theme') === 'dark' ? 'dark' : 'light',
-            language: localStorage.getItem('md-editor-lang') === 'en' ? 'en-US' : 'de-DE',
+            theme: savedTheme,
+            language: savedLang === 'de' ? 'de-DE' : 'en-US',
             events: {
                 change: () => updateStatusBar()
             }
@@ -102,13 +106,10 @@ window.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 2. UI Status Setup
-    const savedTheme = localStorage.getItem('md-editor-theme') || 'dark';
     document.body.setAttribute('data-theme', savedTheme);
     if (savedTheme === 'dark') {
         document.querySelector('#editor-widget').classList.add('toastui-editor-dark');
     }
-    const savedLang = localStorage.getItem('md-editor-lang') || 'de';
     setLanguage(savedLang);
 
     // 3. Electron vs Web Check
