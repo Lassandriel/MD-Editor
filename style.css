@@ -58,7 +58,7 @@ body {
 /* Windows Header */
 .window-header {
     height: 32px;
-    background-color: var(--win-header-bg);
+    background-color: var(--bg-secondary);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -139,7 +139,7 @@ body {
 /* Menu Bar */
 .menu-bar {
     display: flex;
-    background-color: var(--win-header-bg);
+    background-color: var(--bg-secondary);
     padding: 2px 8px;
     border-bottom: 1px solid var(--win-border);
     -webkit-app-region: no-drag; /* Menü muss klickbar bleiben */
@@ -161,10 +161,10 @@ body {
     position: absolute;
     top: 100%;
     left: 0;
-    background-color: var(--win-header-bg);
+    background-color: var(--bg-secondary);
     border: 1px solid var(--win-border);
-    box-shadow: var(--menu-shadow);
-    z-index: 1000;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+    z-index: 5000; /* Viel höher als der Editor */
     min-width: 180px;
     padding: 4px 0;
 }
@@ -185,12 +185,14 @@ body {
 }
 
 .dropdown div {
-    padding: 6px 16px;
-    font-size: 12px;
+    padding: 8px 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    cursor: pointer;
 }
 
 .dropdown div:hover {
-    background-color: var(--win-accent);
+    background-color: var(--accent-color);
     color: white;
 }
 
@@ -206,11 +208,9 @@ body {
 /* Editor Area */
 .editor-container {
     flex: 1;
-    background-color: white;
+    background-color: var(--bg-primary);
     overflow: hidden;
 }
-
-[data-theme="dark"] .editor-container { background-color: #1c1c1c; }
 
 /* ToastUI Custom Styling */
 .toastui-editor-defaultUI {
@@ -224,7 +224,7 @@ body {
 .toastui-editor-contents *,
 .toastui-editor-ww-container *,
 .toastui-editor-md-container * {
-    color: var(--win-text); /* Kein !important hier, damit Code-Regeln greifen können */
+    color: var(--text-primary);
 }
 
 /* 2. Zwinge Paragraphs und Headlines zur Theme-Farbe */
@@ -234,7 +234,7 @@ body {
 .toastui-editor-contents h3,
 .toastui-editor-contents li,
 .toastui-editor-ww-container [contenteditable] {
-    color: var(--win-text) !important;
+    color: var(--text-primary) !important;
 }
 
 /* 3. Code-Blöcke & Inline-Code (In beiden Themes dunkel mit heller Schrift) */
