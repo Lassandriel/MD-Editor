@@ -42,33 +42,33 @@
         </header>
 
         <!-- Hidden input for web file opening -->
-        <input type="file" id="web-file-input" style="display: none;" accept=".md,.txt">
+        <input type="file" id="web-file-input" style="display: none;" accept=".md,.txt,.markdown">
 
         <nav class="menu-bar">
             <div class="menu-item">
                 <span data-i18n="menu-file">Datei</span>
                 <div class="dropdown">
-                    <div id="menu-new" title="Neues Dokument (Strg+N)" data-i18n="menu-new">Neu</div>
-                    <div id="menu-open" title="Dokument öffnen (Strg+O)" data-i18n="menu-open">Öffnen...</div>
-                    <div id="menu-save" title="Speichern (Strg+S)" data-i18n="menu-save">Speichern</div>
+                    <div id="menu-new" title="Neues Dokument (Strg+N)"><span data-i18n="menu-new">Neu</span><span class="shortcut">Ctrl+N</span></div>
+                    <div id="menu-open" title="Dokument öffnen (Strg+O)"><span data-i18n="menu-open">Öffnen...</span><span class="shortcut">Ctrl+O</span></div>
+                    <div id="menu-save" title="Speichern (Strg+S)"><span data-i18n="menu-save">Speichern</span><span class="shortcut">Ctrl+S</span></div>
                     <div class="divider"></div>
-                    <div id="menu-export-pdf" data-i18n="menu-export-pdf">Als PDF exportieren</div>
+                    <div id="menu-export-pdf"><span data-i18n="menu-export-pdf">Als PDF exportieren</span><span class="shortcut">Ctrl+P</span></div>
                 </div>
             </div>
             <div class="menu-item">
                 <span data-i18n="menu-edit">Bearbeiten</span>
                 <div class="dropdown">
-                    <div id="menu-undo" title="Rückgängig (Strg+Z)" data-i18n="menu-undo">Rückgängig</div>
-                    <div id="menu-redo" title="Wiederholen (Strg+Y)" data-i18n="menu-redo">Wiederholen</div>
+                    <div id="menu-undo" title="Rückgängig (Strg+Z)"><span data-i18n="menu-undo">Rückgängig</span><span class="shortcut">Ctrl+Z</span></div>
+                    <div id="menu-redo" title="Wiederholen (Strg+Y)"><span data-i18n="menu-redo">Wiederholen</span><span class="shortcut">Ctrl+Y</span></div>
                     <div class="divider"></div>
-                    <div id="menu-clear" data-i18n="menu-clear">Alles löschen</div>
+                    <div id="menu-clear"><span data-i18n="menu-clear">Alles löschen</span></div>
                 </div>
             </div>
             <div class="menu-item">
                 <span data-i18n="menu-view">Ansicht</span>
                 <div class="dropdown">
-                    <div id="menu-toggle-theme" data-i18n="menu-toggle-theme">Theme umschalten</div>
-                    <div id="menu-fullscreen" data-i18n="menu-fullscreen">Vollbild</div>
+                    <div id="menu-toggle-theme"><span data-i18n="menu-toggle-theme">Theme umschalten</span></div>
+                    <div id="menu-fullscreen"><span data-i18n="menu-fullscreen">Vollbild</span><span class="shortcut">F11</span></div>
                     <div class="divider"></div>
                     <div class="menu-item submenu">
                         <span data-i18n="menu-language">Sprache</span>
@@ -111,7 +111,7 @@
                 <img src="public/logo.png" alt="MD Editor Logo" class="about-logo">
                 <div class="about-text">
                     <h2 data-i18n="menu-about">Über MD Editor</h2>
-                    <p><strong>Version 1.1.0</strong></p>
+                    <p><strong>Version 1.2.1</strong></p>
                     <p>Ein minimalistischer WYSIWYG Markdown-Editor für Windows.</p>
                     <p>Erstellt von <strong>Lassandriel</strong></p>
                     <button id="close-about" class="btn-primary">Schließen</button>
