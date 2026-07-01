@@ -455,3 +455,50 @@ body.is-electron .web-only { display: none; }
     .window-header { display: none; }
     .menu-bar { flex-wrap: wrap; }
 }
+
+/* === Zuletzt geöffnete Dateien === */
+.recent-empty {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-style: italic;
+    cursor: default;
+    background-color: var(--bg-secondary);
+}
+
+.recent-file-item {
+    padding: 6px 16px;
+    cursor: pointer;
+    background-color: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.recent-file-item:hover {
+    background-color: var(--accent-color);
+}
+
+.recent-file-name {
+    font-size: 13px;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.recent-file-dir {
+    font-size: 10px;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.recent-file-item:hover .recent-file-name,
+.recent-file-item:hover .recent-file-dir {
+    color: white;
+}

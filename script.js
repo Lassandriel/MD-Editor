@@ -30,7 +30,10 @@ const translations = {
         'lang-changed': 'Sprache geändert.',
         'save-error': 'Fehler beim Speichern: ',
         'load-error': 'Fehler beim Laden: ',
-        'pdf-missing': 'PDF-Export nicht verfügbar (html2pdf nicht geladen).'
+        'pdf-missing': 'PDF-Export nicht verfügbar (html2pdf nicht geladen).',
+        'menu-recent': 'Zuletzt geöffnet',
+        'menu-no-recent': 'Keine letzten Dateien',
+        'menu-clear-recent': 'Verlauf löschen'
     },
     en: {
         'menu-file': 'File',
@@ -56,7 +59,10 @@ const translations = {
         'lang-changed': 'Language changed.',
         'save-error': 'Save failed: ',
         'load-error': 'Load failed: ',
-        'pdf-missing': 'PDF export unavailable (html2pdf not loaded).'
+        'pdf-missing': 'PDF export unavailable (html2pdf not loaded).',
+        'menu-recent': 'Recent Files',
+        'menu-no-recent': 'No recent files',
+        'menu-clear-recent': 'Clear Recent Files'
     }
 };
 
@@ -181,6 +187,10 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelector('.win-btn.close').addEventListener('click', () => {
             if (confirmDiscardIfDirty()) window.electronAPI.close();
         });
+
+        // Zuletzt geöffnete Dateien: nur in Electron verfügbar
+        document.getElementById('menu-recent-parent').style.display = '';
+        // clear-Handler müssen nach updateRecentFilesMenu existieren — wird später registriert
     }
 
     // Browser/Tab-Schließen-Warnung
@@ -222,6 +232,7 @@ window.addEventListener('DOMContentLoaded', () => {
             editor.setMarkdown(res.content);
             currentFilePath = filePath;
             markSaved();
+            addToRecentFiles(filePath);
         } catch (err) {
             alert(t('load-error') + err.message);
         }
@@ -269,6 +280,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const res = await window.electronAPI.writeFile(currentFilePath, editor.getMarkdown());
             if (!res.ok) { alert(t('save-error') + res.error); return; }
             markSaved();
+            addToRecentFiles(currentFilePath);
         } else {
             const blob = new Blob([editor.getMarkdown()], { type: 'text/markdown' });
             const url = URL.createObjectURL(blob);
@@ -319,6 +331,56 @@ window.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.menu-bar .menu-item').forEach(el => el.classList.remove('active'));
     }
 
+    // === Zuletzt geöffnete Dateien ===
+    const MAX_RECENT = 5;
+
+    function getRecentFiles() {
+        try { return JSON.parse(localStorage.getItem('md-editor-recent') || '[]'); }
+        catch { return []; }
+    }
+
+    function addToRecentFiles(filePath) {
+        if (!filePath) return;
+        let recent = getRecentFiles().filter(p => p !== filePath);
+        recent.unshift(filePath);
+        recent = recent.slice(0, MAX_RECENT);
+        localStorage.setItem('md-editor-recent', JSON.stringify(recent));
+        updateRecentFilesMenu();
+    }
+
+    function updateRecentFilesMenu() {
+        const list        = document.getElementById('recent-files-list');
+        const placeholder = document.getElementById('no-recent-placeholder');
+        const clearDiv    = document.getElementById('recent-clear-divider');
+        const clearBtn    = document.getElementById('recent-clear');
+        const recent      = getRecentFiles();
+
+        list.innerHTML = '';
+
+        if (recent.length === 0) {
+            placeholder.style.display = '';
+            clearDiv.style.display    = 'none';
+            clearBtn.style.display    = 'none';
+        } else {
+            placeholder.style.display = 'none';
+            clearDiv.style.display    = '';
+            clearBtn.style.display    = '';
+            recent.forEach(filePath => {
+                const name = filePath.split(/[/\\]/).pop();
+                const dir  = filePath.replace(/[/\\][^/\\]+$/, '');
+                const div  = document.createElement('div');
+                div.className    = 'recent-file-item';
+                div.title        = filePath;
+                div.innerHTML    = `<span class="recent-file-name">${name}</span><span class="recent-file-dir">${dir}</span>`;
+                div.addEventListener('click', () => {
+                    closeAllMenus();
+                    loadFile(filePath);
+                });
+                list.appendChild(div);
+            });
+        }
+    }
+
     // Sonstige UI Events
     document.getElementById('menu-undo').addEventListener('click', () => editor.exec('undo'));
     document.getElementById('menu-redo').addEventListener('click', () => editor.exec('redo'));
@@ -350,6 +412,14 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('menu-toggle-theme').addEventListener('click', toggleTheme);
     document.getElementById('menu-fullscreen').addEventListener('click', toggleFullscreen);
     document.getElementById('menu-export-pdf').addEventListener('click', exportToPDF);
+    document.getElementById('recent-clear').addEventListener('click', () => {
+        localStorage.removeItem('md-editor-recent');
+        updateRecentFilesMenu();
+        closeAllMenus();
+    });
+
+    // Initiales Befüllen der Zuletzt-geöffnet-Liste (Dateien aus vorheriger Session)
+    if (window.electronAPI) updateRecentFilesMenu();
     
     function switchLanguage(lang) {
         if (lang === currentLang) return;

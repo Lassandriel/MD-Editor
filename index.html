@@ -51,6 +51,15 @@
                     <div id="menu-new" title="Neues Dokument (Strg+N)"><span data-i18n="menu-new">Neu</span><span class="shortcut">Ctrl+N</span></div>
                     <div id="menu-open" title="Dokument öffnen (Strg+O)"><span data-i18n="menu-open">Öffnen...</span><span class="shortcut">Ctrl+O</span></div>
                     <div id="menu-save" title="Speichern (Strg+S)"><span data-i18n="menu-save">Speichern</span><span class="shortcut">Ctrl+S</span></div>
+                    <div class="menu-item submenu" id="menu-recent-parent" style="display:none">
+                        <span data-i18n="menu-recent">Zuletzt geöffnet</span>
+                        <div class="dropdown side">
+                            <div id="recent-files-list"></div>
+                            <div id="no-recent-placeholder" class="recent-empty" data-i18n="menu-no-recent">Keine letzten Dateien</div>
+                            <div class="divider" id="recent-clear-divider" style="display:none"></div>
+                            <div id="recent-clear" style="display:none"><span data-i18n="menu-clear-recent">Verlauf löschen</span></div>
+                        </div>
+                    </div>
                     <div class="divider"></div>
                     <div id="menu-export-pdf"><span data-i18n="menu-export-pdf">Als PDF exportieren</span><span class="shortcut">Ctrl+P</span></div>
                 </div>
