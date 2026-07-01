@@ -369,9 +369,19 @@ window.addEventListener('DOMContentLoaded', () => {
                 const name = filePath.split(/[/\\]/).pop();
                 const dir  = filePath.replace(/[/\\][^/\\]+$/, '');
                 const div  = document.createElement('div');
-                div.className    = 'recent-file-item';
-                div.title        = filePath;
-                div.innerHTML    = `<span class="recent-file-name">${name}</span><span class="recent-file-dir">${dir}</span>`;
+                div.className = 'recent-file-item';
+                div.title     = filePath;
+
+                const spanName = document.createElement('span');
+                spanName.className   = 'recent-file-name';
+                spanName.textContent = name; // textContent statt innerHTML → kein XSS
+
+                const spanDir = document.createElement('span');
+                spanDir.className   = 'recent-file-dir';
+                spanDir.textContent = dir;
+
+                div.appendChild(spanName);
+                div.appendChild(spanDir);
                 div.addEventListener('click', () => {
                     closeAllMenus();
                     loadFile(filePath);
