@@ -27,7 +27,6 @@ const translations = {
         'status-cursor': (l, col) => `Zeile ${l}, Spalte ${col}`,
         'confirm-new': 'Neues Dokument erstellen? Ungespeicherte Änderungen gehen verloren.',
         'confirm-discard': 'Ungespeicherte Änderungen verwerfen?',
-        'lang-changed': 'Sprache geändert.',
         'save-error': 'Fehler beim Speichern: ',
         'load-error': 'Fehler beim Laden: ',
         'pdf-missing': 'PDF-Export nicht verfügbar (html2pdf nicht geladen).',
@@ -56,7 +55,6 @@ const translations = {
         'status-cursor': (l, col) => `Line ${l}, Col ${col}`,
         'confirm-new': 'Create new document? Unsaved changes will be lost.',
         'confirm-discard': 'Discard unsaved changes?',
-        'lang-changed': 'Language changed.',
         'save-error': 'Save failed: ',
         'load-error': 'Load failed: ',
         'pdf-missing': 'PDF export unavailable (html2pdf not loaded).',
@@ -162,7 +160,7 @@ window.addEventListener('DOMContentLoaded', () => {
         return inst;
     }
 
-    // 3. Editor Initialisierung
+    // 3. Editor-Initialisierung
     try {
         editor = buildEditor(savedTheme, savedLang, '');
         const overlay = document.getElementById('loading-overlay');
@@ -177,7 +175,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setLanguage(savedLang);
     markSaved();
 
-    // 3. Electron vs Web Check
+    // 4. Electron vs. Web
     if (window.electronAPI) {
         document.body.classList.add('is-electron');
         window.electronAPI.onOpenFile((filePath) => loadFile(filePath));
@@ -190,7 +188,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
         // Zuletzt geöffnete Dateien: nur in Electron verfügbar
         document.getElementById('menu-recent-parent').style.display = '';
-        // clear-Handler müssen nach updateRecentFilesMenu existieren — wird später registriert
     }
 
     // Browser/Tab-Schließen-Warnung
